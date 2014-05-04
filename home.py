@@ -1,9 +1,9 @@
-# Stephanie Tilden
-# cse30332
-# twisted
-# Due April 30, 2014
+# Nathaniel Pawelczyk & Stephanie Tilden
+# CSE 30332
+# Pygame + Twisted Final Project
+# Due May 7, 2014
 
-# home.py
+# home.py provides twisted functionality
 
 # command port is 40061
 # data port is 80061

@@ -1,3 +1,10 @@
+# Nathaniel Pawelczyk & Stephanie Tilden
+# CSE 30332
+# Pygame + Twisted Final Project
+# Due May 7, 2014
+
+# player.py provides player functionality
+
 import pygame
 import math
 
