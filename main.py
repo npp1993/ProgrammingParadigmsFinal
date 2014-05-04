@@ -34,7 +34,7 @@ class ClientConnection(Protocol):
 		
 class ClientConnectionFactory(protocol.Factory):
 	def buildProtocol(self, addr):
-		return Client()
+		return ClientConnection()
 		
 		
 		
