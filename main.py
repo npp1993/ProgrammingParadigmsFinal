@@ -60,8 +60,7 @@ class ServerConnection(Protocol):
 class ServerConnectionFactory(ReconnectingClientFactory):
 	def buildProtocol(self, addr):
 		self.resetDelay()
-		commandconn = Command()
-		return commandconn
+		return ServerConnection()
 
 	def clientConnectionLost(self, connector, reason):
 		print "Lost connection.  Reason:", reason
