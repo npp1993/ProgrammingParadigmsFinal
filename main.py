@@ -22,6 +22,9 @@ class ClientConnection(Protocol):
 		gs.player2.rect = pickle.loads(data)
 		
 	def connectionMade(self):
+		gs = GameSpace(connection)
+		gs.main()  #start gamespac
+	
 		print "connected to client"
 		global connection
 		connection = self
@@ -38,6 +41,9 @@ class ServerConnection(Protocol):
 		gs.player2.rect = pickle.loads(data)
 
 	def connectionMade(self):
+		gs = GameSpace(connection)
+		gs.main()  #start gamespac
+	
 		print "connected to server"
 		global connection
 		connection = self
@@ -68,9 +74,6 @@ if __name__ == '__main__':
 	elif(sys.argv[1] == "client"):  #if player has specified himself as client, connect to server
 		if(len(sys.argv) == 3):
 			reactor.connectTCP(sys.argv[2], 40046, ServerConnectionFactory()) 
-
-	gs = GameSpace(connection)
-	gs.main()  #start gamespac
 
 	reactor.run()
 
