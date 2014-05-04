@@ -23,6 +23,7 @@ class ClientConnection(Protocol):
 		
 	def connectionMade(self):
 		print "connected to client"
+		self.transport.write("hhi")
 		gs = GameSpace(self)
 		gs.main()  #start gamespac
 		
