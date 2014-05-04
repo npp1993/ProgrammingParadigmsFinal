@@ -22,6 +22,7 @@ class ClientConnection(Protocol):
 		gs.player2.rect = pickle.loads(data)
 		
 	def connectionMade(self):
+		print "connected to client"
 		global connection
 		connection = self
 		
@@ -37,6 +38,7 @@ class ServerConnection(Protocol):
 		gs.player2.rect = pickle.loads(data)
 
 	def connectionMade(self):
+		print "connected to server"
 		global connection
 		connection = self
 	
