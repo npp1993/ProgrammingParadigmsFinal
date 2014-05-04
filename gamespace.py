@@ -8,6 +8,11 @@
 from twisted.internet.protocol import Protocol
 import cPickle as pickle
 
+from player import Player
+from enemy import Enemy
+from explosion import Explosion
+from bullet import Bullet
+
 import pygame
 import math
 import sys, getopt
