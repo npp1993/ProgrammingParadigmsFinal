@@ -5,17 +5,20 @@
 
 # gamespace.py starts the game
 
+from twisted.internet.protocol import Protocol
+import cPickle as pickle
+
 import pygame
 import math
 import sys, getopt
-
-from twisted.internet import protocol, reactor
-from twisted.internet.defer import DeferredQueue
 
 from work import *
 from home import *
 
 class GameSpace:
+	def __init__(self, connection):
+		self.connection = connection
+
 	def main(self):
 		# basic initialization
 		pygame.init()
@@ -27,6 +30,7 @@ class GameSpace:
 		# set up game objects
 		self.clock = pygame.time.Clock()
 		self.player = Player(self)
+		self.player2 = Player(self)
 		self.enemy = Enemy(self)
 
 		# set repeat and initialize variables
@@ -64,11 +68,15 @@ class GameSpace:
 			self.player.tick()
 			self.enemy.tick()
 
+			data = pickle.dumps(self.player.rect)
+			self.connection.transport.write(data)
+
 			# blit to screen
 			self.screen.fill(self.black)
 			for bullet in self.bullets:
 				self.screen.blit(bullet.image, bullet.rect)
 			self.screen.blit(self.player.image, self.player.rect)
+			self.screen.blit(self.player2.image, self.player2.rect)
 			# if statement to only show enemy before explosion
 			if self.enemyExists:
 				self.screen.blit(self.enemy.image, self.enemy.rect)
@@ -77,24 +85,5 @@ class GameSpace:
 	
 			pygame.display.flip()
 
-if __name__ == '__main__':
-	if len(sys.argv) < 2:
-		print "use: python gamespace.py <player>"
-
-	player = sys.argv[1]
-
-	if player == "player1": # home
-		home_connections = {}
-		reactor.listenTCP(40061, home_CommandConnFactory())
-		reactor.listenTCP(9001, home_ClientConnFactory())
-		reactor.run()
-	elif player == "player2": # work
-		work_connections = {}
-		reactor.connectTCP('student00.cse.nd.edu', 40061, work_CommandConnFactory())
-		reactor.run()
-
-	# play 
-	gs = GameSpace()
-	gs.main()
 
 
