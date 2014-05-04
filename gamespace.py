@@ -67,7 +67,7 @@ class GameSpace:
 				if event.type == pygame.KEYDOWN:
 					self.player.move(event.key)
 				elif event.type == pygame.QUIT:
-					exit()
+					exit(0)
 			
 			# tick bullets, player, enemy
 			for bullet in self.bullets:
