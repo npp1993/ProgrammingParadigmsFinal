@@ -19,7 +19,8 @@ gs = 0 #variable to hold local gamespace
 class ClientConnection(Protocol):
 
 	def dataReceived(self, data):
-		gs.player2.rect = pickle.loads(data)
+		print "got data from client"
+		gs.player2 = pickle.loads(data)
 		
 	def connectionMade(self):
 		print "connected to client"
@@ -38,7 +39,8 @@ class ClientConnectionFactory(protocol.Factory):
 class ServerConnection(Protocol):
 
 	def dataReceived(self, data):
-		gs.player2.rect = pickle.loads(data)
+		print "got data from server"
+		gs.player2 = pickle.loads(data)
 
 	def connectionMade(self):
 		print "connected to server"

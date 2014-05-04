@@ -74,7 +74,7 @@ class GameSpace:
 			self.player.tick()
 			self.enemy.tick()
 
-			data = pickle.dumps(self.player.rect)
+			data = pickle.dumps(self.player)
 			self.connection.transport.write(data)
 
 			# blit to screen
