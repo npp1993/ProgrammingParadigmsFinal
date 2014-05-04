@@ -69,8 +69,8 @@ if __name__ == '__main__':
 		if(len(sys.argv) == 3):
 			reactor.connectTCP(sys.argv[2], 40046, ServerConnectionFactory()) 
 
-	reactor.run()
-
 	gs = GameSpace(connection)
-	gs.main()  #start gamespace
+	gs.main()  #start gamespac
+
+	reactor.run()
 
