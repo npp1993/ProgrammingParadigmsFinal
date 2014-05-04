@@ -24,6 +24,8 @@ from home import *
 class GameSpace:
 	def __init__(self, connection):
 		self.connection = connection
+		
+		print connection
 
 	def main(self):
 		# basic initialization
@@ -74,7 +76,7 @@ class GameSpace:
 			self.player.tick()
 			self.enemy.tick()
 
-			data = pickle.dumps(self.player)
+			data = pickle.dumps(self.player.rect)
 			self.connection.transport.write(data)
 
 			# blit to screen

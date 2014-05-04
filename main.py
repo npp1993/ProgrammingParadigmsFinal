@@ -13,21 +13,17 @@ from gamespace import *
 import math
 import sys
 
-connection = 0 #global to hold either client or server connection
 gs = 0 #variable to hold local gamespace
 
 class ClientConnection(Protocol):
 
 	def dataReceived(self, data):
-		print "got data from client"
-		gs.player2 = pickle.loads(data)
+		print "got data from client" + data
+		gs.player2.rect = pickle.loads(data)
 		
 	def connectionMade(self):
 		print "connected to client"
-		global connection
-		connection = self
-	
-		gs = GameSpace(connection)
+		gs = GameSpace(self)
 		gs.main()  #start gamespac
 		
 class ClientConnectionFactory(protocol.Factory):
@@ -40,14 +36,11 @@ class ServerConnection(Protocol):
 
 	def dataReceived(self, data):
 		print "got data from server"
-		gs.player2 = pickle.loads(data)
+		gs.player2.rect = pickle.loads(data)
 
 	def connectionMade(self):
 		print "connected to server"
-		global connection
-		connection = self
-	
-		gs = GameSpace(connection)
+		gs = GameSpace(self)
 		gs.main()  #start gamespac
 	
 
