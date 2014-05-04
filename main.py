@@ -22,12 +22,12 @@ class ClientConnection(Protocol):
 		gs.player2.rect = pickle.loads(data)
 		
 	def connectionMade(self):
-		gs = GameSpace(connection)
-		gs.main()  #start gamespac
-	
 		print "connected to client"
 		global connection
 		connection = self
+	
+		gs = GameSpace(connection)
+		gs.main()  #start gamespac
 		
 class ClientConnectionFactory(protocol.Factory):
 	def buildProtocol(self, addr):
@@ -41,12 +41,12 @@ class ServerConnection(Protocol):
 		gs.player2.rect = pickle.loads(data)
 
 	def connectionMade(self):
-		gs = GameSpace(connection)
-		gs.main()  #start gamespac
-	
 		print "connected to server"
 		global connection
 		connection = self
+	
+		gs = GameSpace(connection)
+		gs.main()  #start gamespac
 	
 
 class ServerConnectionFactory(ReconnectingClientFactory):
