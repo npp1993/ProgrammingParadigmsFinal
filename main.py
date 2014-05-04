@@ -2,10 +2,12 @@
 # File:         main.py
 # CSE 30332
 
-from twisted.internet.protocol import Protocol, Factory, ClientFactory, ReconnectingClientFactory
-from twisted.internet import protocol, reactor
+from twisted.internet.protocol import Protocol, ClientFactory, ReconnectingClientFactory
+from twisted.internet import reactor
 from twisted.internet.defer import DeferredQueue
+from twisted.internet import protocol, reactor
 import pygame
+
 import math
 import sys
 
@@ -30,7 +32,7 @@ class ClientConnection(Protocol):
 		self.transport.write("connected")
 		connection = self
 		
-class ClientConnectionFactory(Factory):
+class ClientConnectionFactory(protocol.Factory):
 	def buildProtocol(self, addr):
 		return Client()
 		
