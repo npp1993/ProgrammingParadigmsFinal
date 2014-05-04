@@ -9,6 +9,7 @@ from twisted.internet.protocol import Protocol
 import cPickle as pickle
 
 from player import Player
+from player2 import Player2
 from enemy import Enemy
 from explosion import Explosion
 from bullet import Bullet
@@ -35,7 +36,7 @@ class GameSpace:
 		# set up game objects
 		self.clock = pygame.time.Clock()
 		self.player = Player(self)
-		self.player2 = Player(self)
+		self.player2 = Player2(self)
 		self.enemy = Enemy(self)
 
 		# set repeat and initialize variables
