@@ -8,6 +8,9 @@
 import pygame
 import math
 
+from bullet import *
+from explosion import *
+
 class Enemy(pygame.sprite.Sprite):
 	def __init__(self, gs = None):
 		pygame.sprite.Sprite.__init__(self)

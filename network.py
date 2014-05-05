@@ -12,21 +12,26 @@ from gamespace import GameSpace
 
 gs = 0  #define global variable gamespace 
 
-def startGamespace(conn):  #initialize gamespace, start looping call for gamespace main loop
+def startGameSpace(conn):  #initialize gamespace, start looping call for gamespace main loop
 	global gs
 	gs = GameSpace(conn)
 	gs.main()
 	
 	tick = LoopingCall(gs.tick)  #set up looping call to run gamespace tick
 	tick.start(1.0/60)  #set to run tick every 60th of a second
+	
+def updateGameSpace(data):  #update player2 object with network data
+	unpacked = pickle.loads(data)
+	gs.player2.rect = unpacked[0]  #get other player data
+	gs.player2.angle = unpacked[1]
 
 class ClientConnection(Protocol):
 
 	def dataReceived(self, data):
-		gs.player2.rect = pickle.loads(data)
+		updateGameSpace(data)
 		
 	def connectionMade(self):
-		startGamespace(self)
+		startGameSpace(self)
 		
 class ClientConnectionFactory(Factory):
 	def buildProtocol(self, addr):
@@ -36,10 +41,10 @@ class ClientConnectionFactory(Factory):
 class ServerConnection(Protocol):
 
 	def dataReceived(self, data):
-		gs.player2.rect = pickle.loads(data)
+		updateGameSpace(data)
 
 	def connectionMade(self):
-		startGamespace(self)
+		startGameSpace(self)
 	
 
 class ServerConnectionFactory(ReconnectingClientFactory):

@@ -18,8 +18,9 @@ import pygame
 import math
 import sys, getopt
 
-from work import *
-from home import *
+from bullet import *
+from explosion import *
+from enemy import *
 
 class GameSpace:
 	def __init__(self, connection):
@@ -70,24 +71,32 @@ class GameSpace:
 			bullet.tick()
 
 		self.player.tick()
+		self.player2.tick()  #update player 2 based on network data
 		self.enemy.tick()
 
-		data = pickle.dumps(self.player.rect)
+		unpacked = list()  #create data structure to send to other player
+		unpacked.append(self.player.rect)
+		unpacked.append(self.player.angle)
+		
+		data = pickle.dumps(unpacked)
 		self.connection.transport.write(data)
 
 		# blit to screen
 		self.screen.fill(self.black)
+		
 		for bullet in self.bullets:
 			self.screen.blit(bullet.image, bullet.rect)
+			
 		self.screen.blit(self.player.image, self.player.rect)
 		self.screen.blit(self.player2.image, self.player2.rect)
+		
 		# if statement to only show enemy before explosion
 		if self.enemyExists:
 			self.screen.blit(self.enemy.image, self.enemy.rect)
 		if self.exploding:
 			self.screen.blit(self.enemy.explosion.image, self.enemy.explosion.rect)
 
-		pygame.display.flip()
+		pygame.display.flip()  #flip display buffers
 
 
 

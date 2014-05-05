@@ -8,6 +8,8 @@
 import pygame
 import math
 
+from bullet import *
+
 class Player(pygame.sprite.Sprite):
 	def __init__(self, gs = None):
 		pygame.sprite.Sprite.__init__(self)
@@ -16,6 +18,7 @@ class Player(pygame.sprite.Sprite):
 		self.gs = gs
 		self.image = pygame.image.load("deathstar.png")
 		self.rect = self.image.get_rect()
+		self.angle = 0
 		self.orig_image = self.image
 
 		# initialize variables
@@ -28,22 +31,21 @@ class Player(pygame.sprite.Sprite):
 		px = self.rect.centerx
 		py = self.rect.centery
 		# calculate angle to rotate & shoot bullet
-		angle = -math.atan2(my-py, mx-px)
+		self.angle = -math.atan2(my-py, mx-px)
 
 		# create new bullet and add to bullets[]
 		if self.tofire == True:
 			self.gs.laserNoise.play()
-			newBullet = Bullet(self.gs, angle)
+			newBullet = Bullet(self.gs, self.angle)
 			self.gs.bullets.append(newBullet)
 			self.tofire = False
 		else:
 			# rotate image to face mouse
-			angle = math.degrees(angle) - 30
-			self.image = pygame.transform.rotate(self.orig_image, angle)
+			self.angle = math.degrees(self.angle) - 30
+			self.image = pygame.transform.rotate(self.orig_image, self.angle)
 			rotate_rect = self.image.get_rect()
 			rotate_rect.center = self.rect.center
 			self.rect = rotate_rect
-			self.gs.screen.blit(self.image, self.rect)
 
 	def move(self, key):
 		# handle key events to move player and fire
@@ -51,9 +53,11 @@ class Player(pygame.sprite.Sprite):
 			self.rect = self.rect.move(self.hspeed, 0)
 		elif key == pygame.K_LEFT:
 			self.rect = self.rect.move(-self.hspeed, 0) 
-		elif key == pygame.K_UP:
+		
+		if key == pygame.K_UP:
 			self.rect = self.rect.move(0, -self.vspeed)
 		elif key == pygame.K_DOWN:
 			self.rect = self.rect.move(0, self.vspeed)
-		elif key == pygame.K_SPACE:
+			
+		if key == pygame.K_SPACE:
 			self.tofire = True;
