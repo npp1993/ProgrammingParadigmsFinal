@@ -50,8 +50,7 @@ class GameSpace:
 		self.explodeNoise = pygame.mixer.Sound("explode.wav")
 
 	def tick(self): #called every 1/60th of second by LoopingCall in main
-		# clock tick regulation (framerate)
-		self.clock.tick(60)
+		# clock tick regulation (framerate) is handled by LoopingCall
 
 		# if exploding, play explodeNoise and go to next scene in explosion
 		if self.exploding:
@@ -64,7 +63,7 @@ class GameSpace:
 			if event.type == pygame.KEYDOWN:
 				self.player.move(event.key)
 			elif event.type == pygame.QUIT:
-				exit(0)
+				reactor.stop() #stop twisted reactor
 		
 		# tick bullets, player, enemy
 		for bullet in self.bullets:

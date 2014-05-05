@@ -3,14 +3,11 @@
 # CSE 30332
 
 from twisted.internet import reactor
-from twisted.internet.task import LoopingCall
 from network import *
 from gamespace import *
 
 import math
 import sys
-
-gs = 0 #variable to hold local gamespace
                 
 if __name__ == '__main__':
 	if(len(sys.argv) < 2):  #get number of command line args
@@ -23,5 +20,5 @@ if __name__ == '__main__':
 		if(len(sys.argv) == 3):
 			reactor.connectTCP(sys.argv[2], 40046, ServerConnectionFactory()) 
 
-	#wait for connection to be created before creating gamespace, see network.py
+	reactor.run()  #wait for connection to be created before creating gamespace, see network.py
 
