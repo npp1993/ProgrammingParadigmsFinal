@@ -16,8 +16,11 @@ class Player(pygame.sprite.Sprite):
 
 		# initialize and load images
 		self.gs = gs
-		self.image = pygame.image.load("deathstar.png")
+		self.image = pygame.image.load("media/galaga_spaceship.png")
 		self.rect = self.image.get_rect()
+		# place at bottom right of screen
+		self.rect.center = (self.gs.width-10, self.gs.height-10)
+
 		self.angle = 0
 		self.orig_image = self.image
 
@@ -54,10 +57,10 @@ class Player(pygame.sprite.Sprite):
 		elif key == pygame.K_LEFT:
 			self.rect = self.rect.move(-self.hspeed, 0) 
 		
-		if key == pygame.K_UP:
-			self.rect = self.rect.move(0, -self.vspeed)
-		elif key == pygame.K_DOWN:
-			self.rect = self.rect.move(0, self.vspeed)
+		#if key == pygame.K_UP:
+		#	self.rect = self.rect.move(0, -self.vspeed)
+		#elif key == pygame.K_DOWN:
+		#	self.rect = self.rect.move(0, self.vspeed)
 			
 		if key == pygame.K_SPACE:
 			self.tofire = True;

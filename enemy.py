@@ -17,10 +17,10 @@ class Enemy(pygame.sprite.Sprite):
 
 		# initialize enemy sprite
 		self.gs = gs
-		self.image = pygame.image.load("globe.png")
+		self.image = pygame.image.load("media/galaga_enemy1.png")
 		self.rect = self.image.get_rect()
 		# place in bottom center of screen
-		self.rect.center = (self.gs.width/2, self.gs.height)
+		self.rect.center = (self.gs.width/2, self.gs.height/8)
 
 		# initialize variables
 		self.hspeed = 2
