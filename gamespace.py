@@ -24,8 +24,6 @@ from home import *
 class GameSpace:
 	def __init__(self, connection):
 		self.connection = connection
-		
-		print connection
 
 	def main(self):
 		# basic initialization
@@ -51,47 +49,46 @@ class GameSpace:
 		self.laserNoise = pygame.mixer.Sound("screammachine.wav")
 		self.explodeNoise = pygame.mixer.Sound("explode.wav")
 
-		# start game loop 
-		while 1:
-			# clock tick regulation (framerate)
-			self.clock.tick(60)
+	def tick(self): #called every 1/60th of second by LoopingCall in main
+		# clock tick regulation (framerate)
+		self.clock.tick(60)
 
-			# if exploding, play explodeNoise and go to next scene in explosion
-			if self.exploding:
-				self.enemy.explosion.tick()
-				self.laserNoise.stop()
-				self.explodeNoise.play()
+		# if exploding, play explodeNoise and go to next scene in explosion
+		if self.exploding:
+			self.enemy.explosion.tick()
+			self.laserNoise.stop()
+			self.explodeNoise.play()
 
-			# event handler
-			for event in pygame.event.get():
-				if event.type == pygame.KEYDOWN:
-					self.player.move(event.key)
-				elif event.type == pygame.QUIT:
-					exit(0)
-			
-			# tick bullets, player, enemy
-			for bullet in self.bullets:
-				bullet.tick()
+		# event handler
+		for event in pygame.event.get():
+			if event.type == pygame.KEYDOWN:
+				self.player.move(event.key)
+			elif event.type == pygame.QUIT:
+				exit(0)
+		
+		# tick bullets, player, enemy
+		for bullet in self.bullets:
+			bullet.tick()
 
-			self.player.tick()
-			self.enemy.tick()
+		self.player.tick()
+		self.enemy.tick()
 
-			data = pickle.dumps(self.player.rect)
-			self.connection.transport.write(data)
+		data = pickle.dumps(self.player.rect)
+		self.connection.transport.write(data)
 
-			# blit to screen
-			self.screen.fill(self.black)
-			for bullet in self.bullets:
-				self.screen.blit(bullet.image, bullet.rect)
-			self.screen.blit(self.player.image, self.player.rect)
-			self.screen.blit(self.player2.image, self.player2.rect)
-			# if statement to only show enemy before explosion
-			if self.enemyExists:
-				self.screen.blit(self.enemy.image, self.enemy.rect)
-			if self.exploding:
-				self.screen.blit(self.enemy.explosion.image, self.enemy.explosion.rect)
-	
-			pygame.display.flip()
+		# blit to screen
+		self.screen.fill(self.black)
+		for bullet in self.bullets:
+			self.screen.blit(bullet.image, bullet.rect)
+		self.screen.blit(self.player.image, self.player.rect)
+		self.screen.blit(self.player2.image, self.player2.rect)
+		# if statement to only show enemy before explosion
+		if self.enemyExists:
+			self.screen.blit(self.enemy.image, self.enemy.rect)
+		if self.exploding:
+			self.screen.blit(self.enemy.explosion.image, self.enemy.explosion.rect)
+
+		pygame.display.flip()
 
 
 
