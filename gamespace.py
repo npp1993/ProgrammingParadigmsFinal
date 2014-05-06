@@ -45,6 +45,7 @@ class GameSpace:
 		self.enemies = enemyController(self)
 
 		# set up sounds
+		self.bulletNoise = pygame.mixer.Sound("media/bullet.wav")
 		#self.laserNoise = pygame.mixer.Sound("media/screammachine.wav")
 		#self.explodeNoise = pygame.mixer.Sound("media/explode.wav")
 
