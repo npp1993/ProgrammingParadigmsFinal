@@ -6,6 +6,7 @@
 # gamespace.py starts the game
 
 from twisted.internet.protocol import Protocol
+from twisted.internet import reactor
 import cPickle as pickle
 
 from player import Player
@@ -38,7 +39,7 @@ class GameSpace:
 		self.clock = pygame.time.Clock()
 		self.player = Player(self)
 		self.player2 = Player2(self)
-		self.enemy = Enemy(self)
+		#self.enemy = Enemy(self)
 		
 		self.bulletImage = pygame.image.load("media/laser.png")  #store bullet sprite in local gamespace so it is not sent over the network
 
@@ -47,6 +48,8 @@ class GameSpace:
 		self.bullets = []
 		self.exploding = False
 		self.enemyExists = True
+
+		self.enemies = enemyController(self)
 
 		# set up sounds
 		#self.laserNoise = pygame.mixer.Sound("media/screammachine.wav")
@@ -95,9 +98,11 @@ class GameSpace:
 		self.screen.blit(self.player.image, self.player.rect)  #display local player
 		self.screen.blit(self.player2.image, self.player2.rect)  #display player 2
 		
+		self.enemies.blit()
+
 		# if statement to only show enemy before explosion
-		if self.enemyExists:
-			self.screen.blit(self.enemy.image, self.enemy.rect)
+		#if self.enemyExists:
+		#	self.screen.blit(self.enemy.image, self.enemy.rect)
 		if self.exploding:
 			self.screen.blit(self.enemy.explosion.image, self.enemy.explosion.rect)
 

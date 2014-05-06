@@ -12,7 +12,7 @@ from bullet import *
 from explosion import *
 
 class Enemy(pygame.sprite.Sprite):
-	def __init__(self, gs = None):
+	def __init__(self, x, y, gs = None):
 		pygame.sprite.Sprite.__init__(self)
 
 		# initialize enemy sprite
@@ -20,7 +20,7 @@ class Enemy(pygame.sprite.Sprite):
 		self.image = pygame.image.load("media/galaga_enemy1.png")
 		self.rect = self.image.get_rect()
 		# place in bottom center of screen
-		self.rect.center = (self.gs.width/2, self.gs.height/8)
+		self.rect.center = (x,y)
 
 		# initialize variables
 		self.hspeed = 2
@@ -52,3 +52,22 @@ class Enemy(pygame.sprite.Sprite):
 
 		# keeps the enemy moving back and forth
 		self.rect = self.rect.move(self.hspeed, 0)
+
+
+class enemyController:
+	def __init__(self, gs = None):
+		self.gs = gs
+		# one enemy is 26 x 29 pixels
+		self.leftEnemy = Enemy(self.gs.width/2-20, self.gs.height/8)
+		self.middleEnemy = Enemy(self.gs.width/2, self.gs.height/8)
+		self.rightEnemy = Enemy(self.gs.width/2+20, self.gs.height/8)
+
+		self.enemies = []
+		self.enemies.append(self.leftEnemy)
+		self.enemies.append(self.middleEnemy)
+		self.enemies.append(self.rightEnemy)
+
+	def blit(self):
+		for enemy in self.enemies:
+			self.screen.blit(enemy.image, enemy.rect)
+		
