@@ -23,7 +23,7 @@ class Enemy(pygame.sprite.Sprite):
 		self.rect.center = (x,y)
 
 		# initialize variables
-		self.hits = 0
+		#self.hits = 0
 		
 		self.i = 1  #used to keep track of which explosion sprite to display
 		
@@ -33,18 +33,25 @@ class Enemy(pygame.sprite.Sprite):
 	def tick(self):
 		if not self.exploding:
 			# create bulletRects to check for collisions
-			bulletRects = []
+			#bulletRects = []
 			for bullet in self.gs.bullets:
-				bulletRects.append(bullet.rect)
+				if self.rect.colliderect(bullet.rect):
+					bullet.remove = True
+					self.exploding = True
+					return
+
+			#	bulletRects.append(bullet.rect)
 
 			# if a bullet has collided, add 1
-			if self.rect.collidelist(bulletRects) >= 0:
-				self.hits +=1
+			#if self.rect.collidelist(bulletRects) >= 0:
+			#	self.hits +=1
+			#for bulletRect in bulletRects:
+			#	if self.rect.collidepoint(bulletRect.
 
 			# if the enemy has been 5 times, explode
-			if self.hits >= 5:
-				self.exploding = True
-				return;
+			#if self.hits >= 5:
+			#	self.exploding = True
+			#	return;
 			
 			# if the enemy hits the edge of the screen, begin moving in the opposite direction
 			if self.rect.collidepoint(self.gs.width-20, self.gs.height/8) or self.rect.collidepoint(20, self.gs.height/8):

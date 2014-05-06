@@ -18,6 +18,7 @@ class Bullet(pygame.sprite.Sprite):
 		self.rect.center = gs.player.rect.center
 
 		self.angle = angle
+		self.remove = False
 
 		# find horizontal and vertical speed according to the angle
 		self.hspeed = math.cos(self.angle)

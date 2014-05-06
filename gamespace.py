@@ -59,7 +59,11 @@ class GameSpace:
 		
 		# tick bullets, player, enemy, explosions
 		for bullet in self.bullets:
-			bullet.tick()
+			nextBullets = []
+			if not bullet.remove:
+				bullet.tick()
+				nextBullets.append(bullet)
+		self.bullets = nextBullets
 			
 		self.enemies.tick()
 
