@@ -67,7 +67,7 @@ class Player(pygame.sprite.Sprite):
                                 self.speed = -self.hspeed
                         if (event.key == pygame.K_SPACE):
 				self.tofire = True;
-                elif event.type == pygame.KEYUP:
+                if event.type == pygame.KEYUP:
                         if (event.key == pygame.K_RIGHT):
                                 self.speed = 0
                         elif (event.key == pygame.K_LEFT):

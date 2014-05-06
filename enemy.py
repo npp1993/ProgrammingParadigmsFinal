@@ -9,25 +9,25 @@ import pygame
 import math
 
 from bullet import *
-from explosion import *
 
 class Enemy(pygame.sprite.Sprite):
-	def __init__(self, x, y, gs = None):
+	def __init__(self, x, y, gs = None, controller = None):
 		pygame.sprite.Sprite.__init__(self)
 
 		# initialize enemy sprite
 		self.gs = gs
+		self.controller = controller
 		self.image = pygame.image.load("media/galaga_enemy1.png")
 		self.rect = self.image.get_rect()
 		# place in bottom center of screen
 		self.rect.center = (x,y)
 
 		# initialize variables
-		self.hspeed = 2
 		self.hits = 0
 		
 		self.i = 1  #used to keep track of which explosion sprite to display
 		
+		self.exploding = False
 		self.remove = False
 
 	def tick(self):
@@ -47,11 +47,11 @@ class Enemy(pygame.sprite.Sprite):
 				return;
 			
 			# if the enemy hits the edge of the screen, begin moving in the opposite direction
-			if self.rect.collidepoint(self.gs.width+20, self.gs.height/8) or self.rect.collidepoint(-20, self.gs.height/8):
-				self.hspeed = -self.hspeed;
+			if self.rect.collidepoint(self.gs.width-20, self.gs.height/8) or self.rect.collidepoint(20, self.gs.height/8):
+				self.controller.hspeed = -self.controller.hspeed;
 
 			# keeps the enemy moving back and forth
-			self.rect = self.rect.move(self.hspeed, 0)
+			self.rect = self.rect.move(self.controller.hspeed, 0)
 		else:
 			# add one to get the next image name in the sequence; if there is no next image, return
 			if self.i > 15:
@@ -61,8 +61,6 @@ class Enemy(pygame.sprite.Sprite):
 			# load next image in sequence
 			self.imagePath = "media/explosion/galaga_enemy1_explosion" + str(self.i) + ".png"
 			self.image = pygame.image.load(self.imagePath)
-			self.rect = self.image.get_rect()
-			self.rect.center = self.center
 			
 			self.i = self.i + 1
 
@@ -71,14 +69,16 @@ class enemyController:
 	def __init__(self, gs = None):
 		self.gs = gs
 		# one enemy is 26 x 29 pixels
-		leftEnemy = Enemy(self.gs.width/2-50, self.gs.height/8, self.gs)
-		middleEnemy = Enemy(self.gs.width/2, self.gs.height/8, self.gs)
-		rightEnemy = Enemy(self.gs.width/2+50, self.gs.height/8, self.gs)
+		leftEnemy = Enemy(self.gs.width/2-50, self.gs.height/8, self.gs, self)
+		middleEnemy = Enemy(self.gs.width/2, self.gs.height/8, self.gs, self)
+		rightEnemy = Enemy(self.gs.width/2+50, self.gs.height/8, self.gs, self)
 
 		self.enemies = []
 		self.enemies.append(leftEnemy)
 		self.enemies.append(middleEnemy)
 		self.enemies.append(rightEnemy)
+		
+		self.hspeed = 2
 		
 	def tick(self):
 		nextEnemies = []

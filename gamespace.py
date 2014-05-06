@@ -11,17 +11,12 @@ import cPickle as pickle
 
 from player import Player
 from player2 import Player2
-from enemy import Enemy
-from explosion import Explosion
+from enemy import *
 from bullet import Bullet
 
 import pygame
 import math
 import sys, getopt
-
-from bullet import *
-from explosion import *
-from enemy import *
 
 class GameSpace:
 	def __init__(self, connection):
