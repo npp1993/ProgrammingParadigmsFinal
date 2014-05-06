@@ -81,7 +81,7 @@ class GameSpace:
 		unpacked["angle"] = self.player.angle
 		
 		if newBullet:
-			unpacked["bullet"] = newBullet
+			unpacked["newBullet"] = newBullet
 		
 		data = pickle.dumps(unpacked)
 		self.connection.transport.write(data)

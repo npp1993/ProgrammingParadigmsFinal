@@ -24,11 +24,9 @@ def updateGameSpace(data):  #update player2 object with network data
 	unpacked = pickle.loads(data)
 	gs.player2.rect = unpacked["rect"]  #get other player data
 	gs.player2.angle = unpacked["angle"]
-	
-	newBullet = unpacked["bullet"]
-	
-	if newBullet:
-		gs.bullets.append(newBullet)
+		
+	if "newBullet" in unpacked:
+		gs.bullets.append(unpacked["newBullet"])
 	
 
 class ClientConnection(Protocol):
