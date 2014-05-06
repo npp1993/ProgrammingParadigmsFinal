@@ -9,12 +9,10 @@ import pygame
 import math
 
 class Bullet(pygame.sprite.Sprite):
-	def __init__(self, gs=None, angle=None):
+	def __init__(self, angle=None):
 		pygame.sprite.Sprite.__init__(self)
 
 		# initialize bullet info
-		self.gs = gs
-		self.image = pygame.image.load("laser.png")
 		self.rect = self.image.get_rect()
 		# start bullet behind the player at the center
 		self.rect.center = self.gs.player.rect.center

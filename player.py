@@ -39,9 +39,11 @@ class Player(pygame.sprite.Sprite):
 		# create new bullet and add to bullets[]
 		if self.tofire == True:
 			self.gs.laserNoise.play()
-			newBullet = Bullet(self.gs, self.angle)
+			newBullet = Bullet(self.angle)
 			self.gs.bullets.append(newBullet)
 			self.tofire = False
+			
+			return newBullet
 		else:
 			# rotate image to face mouse
 			self.angle = math.degrees(self.angle) - 30
@@ -49,6 +51,8 @@ class Player(pygame.sprite.Sprite):
 			rotate_rect = self.image.get_rect()
 			rotate_rect.center = self.rect.center
 			self.rect = rotate_rect
+			
+			return None
 
 	def move(self, key):
 		# handle key events to move player and fire

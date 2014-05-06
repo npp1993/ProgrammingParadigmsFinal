@@ -39,6 +39,8 @@ class GameSpace:
 		self.player = Player(self)
 		self.player2 = Player2(self)
 		self.enemy = Enemy(self)
+		
+		self.bulletImage = pygame.image.load("media/laser.png")  #store bullet sprite in local gamespace so it is not sent over the network
 
 		# set repeat and initialize variables
 		pygame.key.set_repeat(1,1)
@@ -47,8 +49,8 @@ class GameSpace:
 		self.enemyExists = True
 
 		# set up sounds
-		self.laserNoise = pygame.mixer.Sound("screammachine.wav")
-		self.explodeNoise = pygame.mixer.Sound("explode.wav")
+		#self.laserNoise = pygame.mixer.Sound("media/screammachine.wav")
+		#self.explodeNoise = pygame.mixer.Sound("media/explode.wav")
 
 	def tick(self): #called every 1/60th of second by LoopingCall in main
 		# clock tick regulation (framerate) is handled by LoopingCall
@@ -70,13 +72,16 @@ class GameSpace:
 		for bullet in self.bullets:
 			bullet.tick()
 
-		self.player.tick()
+		newBullet = self.player.tick()
 		self.player2.tick()  #update player 2 based on network data
 		self.enemy.tick()
 
-		unpacked = list()  #create data structure to send to other player
-		unpacked.append(self.player.rect)
-		unpacked.append(self.player.angle)
+		unpacked = dict()  #create data structure to send to other player
+		unpacked["rect"] = self.player.rect
+		unpacked["angle"] = self.player.angle
+		
+		if newBullet:
+			unpacked["bullet"] = newBullet
 		
 		data = pickle.dumps(unpacked)
 		self.connection.transport.write(data)
@@ -84,11 +89,11 @@ class GameSpace:
 		# blit to screen
 		self.screen.fill(self.black)
 		
-		for bullet in self.bullets:
-			self.screen.blit(bullet.image, bullet.rect)
+		for bullet in self.bullets:  #display all bullets
+			self.screen.blit(self.bulletImage, bullet.rect)
 			
-		self.screen.blit(self.player.image, self.player.rect)
-		self.screen.blit(self.player2.image, self.player2.rect)
+		self.screen.blit(self.player.image, self.player.rect)  #display local player
+		self.screen.blit(self.player2.image, self.player2.rect)  #display player 2
 		
 		# if statement to only show enemy before explosion
 		if self.enemyExists:

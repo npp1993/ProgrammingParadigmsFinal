@@ -14,7 +14,7 @@ class Player2(pygame.sprite.Sprite):
 
 		# initialize and load images
 		self.gs = gs
-		self.image = pygame.image.load("deathstar2.png")
+		self.image = pygame.image.load("media/galaga_spaceship.png")
 		self.rect = self.image.get_rect()
 		self.angle = 0
 		self.orig_image = self.image

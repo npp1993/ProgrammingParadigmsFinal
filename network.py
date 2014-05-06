@@ -22,8 +22,14 @@ def startGameSpace(conn):  #initialize gamespace, start looping call for gamespa
 	
 def updateGameSpace(data):  #update player2 object with network data
 	unpacked = pickle.loads(data)
-	gs.player2.rect = unpacked[0]  #get other player data
-	gs.player2.angle = unpacked[1]
+	gs.player2.rect = unpacked["rect"]  #get other player data
+	gs.player2.angle = unpacked["angle"]
+	
+	newBullet = unpacked["bullet"]
+	
+	if newBullet:
+		gs.bullets.append(newBullet)
+	
 
 class ClientConnection(Protocol):
 
