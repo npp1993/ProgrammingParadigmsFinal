@@ -18,10 +18,3 @@ class Player2(pygame.sprite.Sprite):
 		self.rect = self.image.get_rect()
 		self.angle = 0
 		self.orig_image = self.image
-
-		
-	def tick(self):
-		self.image = pygame.transform.rotate(self.orig_image, self.angle)
-		rotate_rect = self.image.get_rect()
-		rotate_rect.center = self.rect.center
-		self.rect = rotate_rect

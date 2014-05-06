@@ -58,9 +58,9 @@ class enemyController:
 	def __init__(self, gs = None):
 		self.gs = gs
 		# one enemy is 26 x 29 pixels
-		self.leftEnemy = Enemy(self.gs.width/2-50, self.gs.height/8)
-		self.middleEnemy = Enemy(self.gs.width/2, self.gs.height/8)
-		self.rightEnemy = Enemy(self.gs.width/2+50, self.gs.height/8)
+		self.leftEnemy = Enemy(self.gs.width/2-50, self.gs.height/8, self.gs)
+		self.middleEnemy = Enemy(self.gs.width/2, self.gs.height/8, self.gs)
+		self.rightEnemy = Enemy(self.gs.width/2+50, self.gs.height/8, self.gs)
 
 		self.enemies = []
 		self.enemies.append(self.leftEnemy)
@@ -69,6 +69,6 @@ class enemyController:
 
 	def blit(self):
 		for enemy in self.enemies:
-			self.enemy.tick()
-			self.screen.blit(enemy.image, enemy.rect)
+			enemy.tick()
+			self.gs.screen.blit(enemy.image, enemy.rect)
 		

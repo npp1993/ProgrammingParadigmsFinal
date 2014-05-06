@@ -15,7 +15,7 @@ class Bullet(pygame.sprite.Sprite):
 		# initialize bullet info
 		self.rect = gs.bulletImage.get_rect()
 		# start bullet behind the player at the center
-		self.rect.center = self.gs.player.rect.center
+		self.rect.center = gs.player.rect.center
 
 		self.angle = angle
 

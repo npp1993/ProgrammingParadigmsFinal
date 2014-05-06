@@ -26,20 +26,23 @@ class Player(pygame.sprite.Sprite):
 
 		# initialize variables
 		self.tofire = False
+		self.speed = 0
 		self.hspeed = 3
 		self.vspeed = 3
 
 	def tick(self):
-		mx, my = pygame.mouse.get_pos()
-		px = self.rect.centerx
-		py = self.rect.centery
+		#mx, my = pygame.mouse.get_pos()
+		#px = self.rect.centerx
+		#py = self.rect.centery
 		# calculate angle to rotate & shoot bullet
-		self.angle = -math.atan2(my-py, mx-px)
+		#self.angle = -math.atan2(my-py, mx-px)
+		
+		self.rect = self.rect.move(self.speed, 0)
 
 		# create new bullet and add to bullets[]
 		if self.tofire == True:
 			#self.gs.laserNoise.play()
-			newBullet = Bullet(self.gs, self.angle)
+			newBullet = Bullet(self.gs, math.pi/2)
 			self.gs.bullets.append(newBullet)
 			self.tofire = False
 			
@@ -54,12 +57,14 @@ class Player(pygame.sprite.Sprite):
 			
 			return None
 
-	def move(self, key):
+	def move(self, key):  #only want 2-dimensional motion
 		# handle key events to move player and fire
 		if key == pygame.K_RIGHT:
-			self.rect = self.rect.move(self.hspeed, 0)
+			self.speed = self.hspeed
 		elif key == pygame.K_LEFT:
-			self.rect = self.rect.move(-self.hspeed, 0) 
+			self.speed = -self.hspeed
+		else:
+			self.speed = 0
 		
 		#if key == pygame.K_UP:
 		#	self.rect = self.rect.move(0, -self.vspeed)

@@ -76,8 +76,7 @@ class GameSpace:
 			bullet.tick()
 
 		newBullet = self.player.tick()
-		self.player2.tick()  #update player 2 based on network data
-		self.enemy.tick()
+		#self.enemies.tick()
 
 		unpacked = dict()  #create data structure to send to other player
 		unpacked["rect"] = self.player.rect
