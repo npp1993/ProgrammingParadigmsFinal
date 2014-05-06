@@ -43,18 +43,17 @@ class Player(pygame.sprite.Sprite):
 		self.rect = self.rect.move(self.speed, 0)  #move the ship
 
 		if self.tofire == True:
-			currentTime = datetime.now()
+			currentTime = datetime.now()  #get current time
 			
 			timeDiff = currentTime - self.bulletLastFiredAt  #get time since last bullet was fired
 			
-			if (timeDiff.seconds*1000000) + timeDiff.microseconds > 50000:  #allow for one bullet to be fired every 0.5 seconds
+			if (timeDiff.seconds*1000000) + timeDiff.microseconds > 500000:  #allow for one bullet to be fired every 0.5 seconds
 				self.bulletLastFiredAt = currentTime  #update time that last bullet was fired
 				
-				newBullet = Bullet(self.gs, math.pi/2)
+				newBullet = Bullet(self.gs, math.pi/2)  #create new bullet
+				self.gs.bullets.append(newBullet)  #add it to bullets list
 				
-				self.gs.bullets.append(newBullet)  # create new bullet and add to bullets list
-				
-				#self.gs.bulletNoise.play()
+				self.gs.bulletNoise.play()
 			
 				return newBullet
 		else:
