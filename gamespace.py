@@ -39,15 +39,13 @@ class GameSpace:
 		self.clock = pygame.time.Clock()
 		self.player = Player(self)
 		self.player2 = Player2(self)
-		#self.enemy = Enemy(self)
 		
-		self.bulletImage = pygame.image.load("media/laser.png")  #store bullet sprite in local gamespace so it is not sent over the network
+		self.bulletImage = pygame.image.load("media/bullet.png")  #store bullet sprite in local gamespace so it is not sent over the network
 
 		# set repeat and initialize variables
 		pygame.key.set_repeat(1,1)
 		self.bullets = []
-		self.exploding = False
-		self.enemyExists = True
+		self.explosions = []
 
 		self.enemies = enemyController(self)
 
@@ -57,26 +55,20 @@ class GameSpace:
 
 	def tick(self): #called every 1/60th of second by LoopingCall in main
 		# clock tick regulation (framerate) is handled by LoopingCall
-
-		# if exploding, play explodeNoise and go to next scene in explosion
-		if self.exploding:
-			self.enemy.explosion.tick()
-			self.laserNoise.stop()
-			self.explodeNoise.play()
-
 		# event handler
 		for event in pygame.event.get():
-			if event.type == pygame.KEYDOWN:
-				self.player.move(event.key)
-			elif event.type == pygame.QUIT:
+			if event.type == pygame.QUIT:
 				reactor.stop() #stop twisted reactor
+			else:
+				self.player.move(event)
 		
-		# tick bullets, player, enemy
+		# tick bullets, player, enemy, explosions
 		for bullet in self.bullets:
 			bullet.tick()
+			
+		self.enemies.tick()
 
-		newBullet = self.player.tick()
-		#self.enemies.tick()
+		newBullet = self.player.tick()  #if player created a bullet in this tick, save it to send across network
 
 		unpacked = dict()  #create data structure to send to other player
 		unpacked["rect"] = self.player.rect
@@ -89,7 +81,7 @@ class GameSpace:
 		self.connection.transport.write(data)
 
 		# blit to screen
-		self.screen.fill(self.black)
+		self.screen.fill(self.black)  #clear screen
 		
 		for bullet in self.bullets:  #display all bullets
 			self.screen.blit(self.bulletImage, bullet.rect)
@@ -97,13 +89,7 @@ class GameSpace:
 		self.screen.blit(self.player.image, self.player.rect)  #display local player
 		self.screen.blit(self.player2.image, self.player2.rect)  #display player 2
 		
-		self.enemies.blit()
-
-		# if statement to only show enemy before explosion
-		#if self.enemyExists:
-		#	self.screen.blit(self.enemy.image, self.enemy.rect)
-		if self.exploding:
-			self.screen.blit(self.enemy.explosion.image, self.enemy.explosion.rect)
+		self.enemies.blit()  #blit all enemies
 
 		pygame.display.flip()  #flip display buffers
 

@@ -23,8 +23,8 @@ class Bullet(pygame.sprite.Sprite):
 		self.hspeed = math.cos(self.angle)
 		self.vspeed = math.sin(self.angle)
 		
-		self.hspeed = self.hspeed*4
-		self.vspeed = -self.vspeed*4
+		self.hspeed = self.hspeed*10
+		self.vspeed = -self.vspeed*10
 		
 	def tick(self):
 		# on tick, move the bullet hspeed and vspeed

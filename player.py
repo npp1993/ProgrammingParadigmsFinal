@@ -39,6 +39,7 @@ class Player(pygame.sprite.Sprite):
 		
 		self.rect = self.rect.move(self.speed, 0)
 
+
 		# create new bullet and add to bullets[]
 		if self.tofire == True:
 			#self.gs.laserNoise.play()
@@ -57,19 +58,23 @@ class Player(pygame.sprite.Sprite):
 			
 			return None
 
-	def move(self, key):  #only want 2-dimensional motion
+	def move(self, event):  #only want 2-dimensional motion
 		# handle key events to move player and fire
-		if key == pygame.K_RIGHT:
-			self.speed = self.hspeed
-		elif key == pygame.K_LEFT:
-			self.speed = -self.hspeed
-		else:
-			self.speed = 0
+		if event.type == pygame.KEYDOWN:
+                        if (event.key == pygame.K_RIGHT):
+                                self.speed = self.hspeed
+                        elif (event.key == pygame.K_LEFT):
+                                self.speed = -self.hspeed
+                        if (event.key == pygame.K_SPACE):
+				self.tofire = True;
+                elif event.type == pygame.KEYUP:
+                        if (event.key == pygame.K_RIGHT):
+                                self.speed = 0
+                        elif (event.key == pygame.K_LEFT):
+                                self.speed = 0
 		
 		#if key == pygame.K_UP:
 		#	self.rect = self.rect.move(0, -self.vspeed)
 		#elif key == pygame.K_DOWN:
 		#	self.rect = self.rect.move(0, self.vspeed)
-			
-		if key == pygame.K_SPACE:
-			self.tofire = True;
+
