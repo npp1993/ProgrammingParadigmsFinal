@@ -38,11 +38,11 @@ class Enemy(pygame.sprite.Sprite):
 			self.hits +=1
 		
 		# if the enemy has been hit 130 times, make it red
-		if self.hits == 130:
+		if self.hits == 10:
 			self.image = pygame.image.load("globe_red100.png")
 
 		# if the enemy has been hit 200 times, explode
-		if self.hits == 200:
+		if self.hits == 20:
 			self.explosion = Explosion(self.gs, self) # create explosion object
 			self.gs.exploding = True
 
@@ -66,6 +66,16 @@ class enemyController:
 		self.enemies.append(self.leftEnemy)
 		self.enemies.append(self.middleEnemy)
 		self.enemies.append(self.rightEnemy)
+
+	def addEnemy(self):
+		newEnemyLeft = Enemy(self.leftEnemy.rect.center.x-50, self.gs.height/8, self.gs)
+		newEnemyRight = Enemy(self.rightEnemy.rect.center.y+50, self.gs.height/8, self.gs)
+		
+		self.enemies.append(newEnemyLeft)
+		self.enemies.append(newEnemyRight)
+		
+		self.leftEnemy = newEnemyLeft
+		self.rightEnemy = newEnemyRight
 
 	def blit(self):
 		for enemy in self.enemies:
