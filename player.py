@@ -19,7 +19,7 @@ class Player(pygame.sprite.Sprite):
 		self.image = pygame.image.load("media/galaga_spaceship.png")
 		self.rect = self.image.get_rect()
 		# place at bottom right of screen
-		self.rect.center = (self.gs.width-10, self.gs.height-10)
+		self.rect.center = (self.gs.width-50, self.gs.height-50)
 
 		self.angle = 0
 		self.orig_image = self.image
@@ -38,19 +38,19 @@ class Player(pygame.sprite.Sprite):
 
 		# create new bullet and add to bullets[]
 		if self.tofire == True:
-			self.gs.laserNoise.play()
-			newBullet = Bullet(self.angle)
+			#self.gs.laserNoise.play()
+			newBullet = Bullet(self.gs, self.angle)
 			self.gs.bullets.append(newBullet)
 			self.tofire = False
 			
 			return newBullet
 		else:
 			# rotate image to face mouse
-			self.angle = math.degrees(self.angle) - 30
-			self.image = pygame.transform.rotate(self.orig_image, self.angle)
-			rotate_rect = self.image.get_rect()
-			rotate_rect.center = self.rect.center
-			self.rect = rotate_rect
+			#self.angle = math.degrees(self.angle) - 30
+			#self.image = pygame.transform.rotate(self.orig_image, self.angle)
+			#rotate_rect = self.image.get_rect()
+			#rotate_rect.center = self.rect.center
+			#self.rect = rotate_rect
 			
 			return None
 

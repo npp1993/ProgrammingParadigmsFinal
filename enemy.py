@@ -47,7 +47,7 @@ class Enemy(pygame.sprite.Sprite):
 			self.gs.exploding = True
 
 		# if the enemy hits the edge of the screen, begin moving in the opposite direction
-		if self.rect.collidepoint(self.gs.width+20, self.gs.height) or self.rect.collidepoint(-20, self.gs.height):
+		if self.rect.collidepoint(self.gs.width+20, self.gs.height/8) or self.rect.collidepoint(-20, self.gs.height/8):
 			self.hspeed = -self.hspeed;
 
 		# keeps the enemy moving back and forth

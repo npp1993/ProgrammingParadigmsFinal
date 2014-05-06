@@ -9,11 +9,11 @@ import pygame
 import math
 
 class Bullet(pygame.sprite.Sprite):
-	def __init__(self, angle=None):
+	def __init__(self, gs, angle=None):
 		pygame.sprite.Sprite.__init__(self)
 
 		# initialize bullet info
-		self.rect = self.image.get_rect()
+		self.rect = gs.bulletImage.get_rect()
 		# start bullet behind the player at the center
 		self.rect.center = self.gs.player.rect.center
 
