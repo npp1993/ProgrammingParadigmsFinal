@@ -44,7 +44,21 @@ class GameSpace:
 
 		# set up sounds
 		self.bulletNoise = pygame.mixer.Sound("media/bullet.wav")
-		#self.explodeNoise = pygame.mixer.Sound("media/explode.wav")
+		self.welcomeNoise = pygame.mixer.Sound("media/galagaWelcome.wav")
+
+		self.startScreen()
+
+	def startScreen(self):
+		self.font = pygame.font.Font(None, 30)
+		textImg = self.font.render("PRESS SPACE TO START GAME", 1, (255,0,0))
+		self.screen.blit(textImg, (self.width/2, self.height/2))
+
+		self.welcomeNoise.play()
+
+		for event in pygame.event.get():
+			if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+				return
+				
 		
 	def tick(self): #called every 1/60th of second by LoopingCall in main
 		# clock tick regulation (framerate) is handled by LoopingCall
