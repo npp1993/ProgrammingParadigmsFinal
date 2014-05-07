@@ -12,7 +12,7 @@ import cPickle as pickle
 from player import Player
 from player2 import Player2
 from enemy import *
-from bullet import Bullet
+from bullet import *
 
 import pygame
 import math
@@ -21,8 +21,7 @@ import sys, getopt
 class GameSpace:
 	def __init__(self, connection):
 		self.connection = connection
-	
-	def main(self):
+
 		# basic initialization
 		pygame.init()
 		pygame.mixer.init()
@@ -39,10 +38,8 @@ class GameSpace:
 		self.player2 = Player2(self)
 		
 		self.bulletImage = pygame.image.load("media/bullet.png")  #store bullet sprite in local gamespace so it is not sent over the network
-		self.enemyImage = pygame.image.load("media/galaga_enemy1.png")
 
-		self.bulletController = BulletController(self)  #manages all enemies
-		self.enemyController = EnemyController(self)  #manages all bullets
+		self.bulletController = BulletController(self)  #manages all bullets
 
 		# set up sounds
 		self.bulletNoise = pygame.mixer.Sound("media/bullet.wav")
@@ -56,10 +53,18 @@ class GameSpace:
 				reactor.stop() #stop twisted reactor
 			else:
 				self.player.move(event)
+
+
+class ClientGameSpace(GameSpace):
+	def __init__(self, connection):
+		GameSpace.__init__(self, connection)
+		self.enemies = []
 		
-		#tick bullets, player, enemy, explosions
+	def tick(self):  #tick bullets, player, enemy, explosions
+		GameSpace.tick(self)
 		newBullet = self.player.tick()  #if player created a bullet in this tick, save it to send across network
-		self.enemyController.tick()
+		
+		#enemies are not stored locally and ticked because they contain a server-controlled AI
 		self.bulletController.tick()  #tick all bullets
 		
 		self.sendData(newBullet)  #send all appropriate data to other player
@@ -69,20 +74,26 @@ class GameSpace:
 		
 		self.screen.blit(self.player.image, self.player.rect)  #display local player
 		self.screen.blit(self.player2.image, self.player2.rect)  #display player 2
-		self.enemyController.blit()  #blit all enemies
+		
+		self.displayEnemies()  #display all enemies based on server data
 		self.bulletController.blit()  #blit all bullets
 
 		pygame.display.flip()  #flip display buffers
-
-
-class ClientGameSpace(GameSpace):
-	def __init__(self, connection):
-		GameSpace.__init__(self, connection)
+		
+	def displayEnemies(self):  #display all enemies based on data from server
+		for enemy in self.enemies:
+			if not enemy.exploding:  #enemy not exploding
+				imagePath = "media/galaga_enemy" + str(enemy.imageNum) + ".png"
+				image = pygame.image.load(imagePath)
+				self.screen.blit(image, enemy.rect)
+			else:  #enemy is exploding
+				imagePath = "media/explosion/galaga_enemy1_explosion" + str(enemy.i) + ".png"	
+				image = pygame.image.load(imagePath)
+				self.screen.blit(image, enemy.rect)
 		
 	def sendData(self, newBullet = None):  #send data to other player
 		unpacked = dict()  #create data structure to send to other player
 		unpacked["rect"] = self.player.rect
-		unpacked["angle"] = self.player.angle
 		
 		if newBullet:
 			unpacked["newBullet"] = newBullet
@@ -90,10 +101,12 @@ class ClientGameSpace(GameSpace):
 		data = pickle.dumps(unpacked)
 		self.connection.transport.write(data)
 		
-	def update(self, data):
+	def updateData(self, data):
 		unpacked = pickle.loads(data)
 		self.player2.rect = unpacked["rect"]  #get other player data
-		self.player2.angle = unpacked["angle"]
+		
+		if "enemies" in unpacked:
+			self.enemies = unpacked["enemies"]  #get all enemy data from server
 		
 		if "newBullet" in unpacked:
 			self.bulletController.addBullet(unpacked["newBullet"])
@@ -102,11 +115,37 @@ class ClientGameSpace(GameSpace):
 class ServerGameSpace(GameSpace):
 	def __init__(self, connection):
 		GameSpace.__init__(self, connection)
+		self.enemyController = EnemyController(self)  #manages all enemies
+
+		
+	def tick(self):  #tick bullets, player, enemy, explosions
+		GameSpace.tick(self)
+		newBullet = self.player.tick()  #if player created a bullet in this tick, save it to send across network
+		
+		self.enemyController.tick()  #tick all server-controlled enemies
+		self.bulletController.tick()  #tick all bullets
+		
+		self.sendData(newBullet)  #send all appropriate data to other player
+
+		# blit to screen
+		self.screen.fill(self.black)  #clear screen
+		
+		self.screen.blit(self.player.image, self.player.rect)  #display local player
+		self.screen.blit(self.player2.image, self.player2.rect)  #display player 2
+		
+		self.enemyController.blit()  #blit all enemies
+		self.bulletController.blit()  #blit all bullets
+
+		pygame.display.flip()  #flip display buffers
 		
 	def sendData(self, newBullet = None):  #send data to other player
 		unpacked = dict()  #create data structure to send to other player
 		unpacked["rect"] = self.player.rect
-		unpacked["angle"] = self.player.angle
+		
+		unpacked["enemies"] = []
+		
+		for enemy in self.enemyController.enemies:
+			unpacked["enemies"].append(enemy.data)
 		
 		if newBullet:
 			unpacked["newBullet"] = newBullet
@@ -114,10 +153,9 @@ class ServerGameSpace(GameSpace):
 		data = pickle.dumps(unpacked)
 		self.connection.transport.write(data)
 		
-	def update(self, data):
+	def updateData(self, data):
 		unpacked = pickle.loads(data)
 		self.player2.rect = unpacked["rect"]  #get other player data
-		self.player2.angle = unpacked["angle"]
 		
 		if "newBullet" in unpacked:
 			self.bulletController.addBullet(unpacked["newBullet"])

@@ -9,18 +9,15 @@ from twisted.internet import protocol, reactor
 import pygame
 from gamespace import *
 
-gs = 0  #define global variable gamespace 
+gs = None  #define global variable gamespace 
 
 def startGameSpace(conn, player):  #initialize gamespace, start looping call for gamespace main loop
 	global gs
-	
+
 	if player == "server":  #create different gamespaces depending on which end of the connection game is on
 		gs = ServerGameSpace(conn)
 	else:
 		gs = ClientGameSpace(conn)
-		
-		
-	gs.main()
 	
 	tick = LoopingCall(gs.tick)  #set up looping call to run gamespace tick
 	tick.start(1.0/60)  #set to run tick every 60th of a second
@@ -29,7 +26,7 @@ def startGameSpace(conn, player):  #initialize gamespace, start looping call for
 class ClientConnection(Protocol):
 
 	def dataReceived(self, data):
-		gs.update(data)
+		gs.updateData(data)
 		
 	def connectionMade(self):
 		startGameSpace(self, "server")
@@ -42,7 +39,7 @@ class ClientConnectionFactory(Factory):
 class ServerConnection(Protocol):
 
 	def dataReceived(self, data):
-		gs.update(data)
+		gs.updateData(data)
 
 	def connectionMade(self):
 		startGameSpace(self, "client")
