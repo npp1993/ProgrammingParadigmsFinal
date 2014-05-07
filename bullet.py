@@ -9,11 +9,14 @@ import pygame
 import math
 
 class Bullet(pygame.sprite.Sprite):
-	def __init__(self, gs, angle=None):
+	def __init__(self, gs, angle=None, enemy=False):
 		pygame.sprite.Sprite.__init__(self)
 
 		# initialize bullet info
-		self.rect = gs.bulletImage.get_rect()
+		if enemy:
+			self.rect = gs.enemyBulletImage.get_rect()
+		else:
+			self.rect = gs.bulletImage.get_rect()
 		# start bullet behind the player at the center
 		self.rect.center = gs.player.rect.center
 
@@ -24,8 +27,12 @@ class Bullet(pygame.sprite.Sprite):
 		self.hspeed = math.cos(self.angle)
 		self.vspeed = math.sin(self.angle)
 		
-		self.hspeed = self.hspeed*10
-		self.vspeed = -self.vspeed*10
+		if enemy:
+			self.hspeed = self.hspeed*7
+			self.vspeed = -self.vspeed*13
+		else:
+			self.hspeed = self.hspeed*10
+			self.vspeed = -self.vspeed*10
 		
 	def tick(self):
 		# on tick, move the bullet hspeed and vspeed

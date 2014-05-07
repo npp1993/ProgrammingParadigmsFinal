@@ -38,6 +38,7 @@ class GameSpace:
 		self.player2 = Player2(self)
 		
 		self.bulletImage = pygame.image.load("media/bullet.png")  #store bullet sprite in local gamespace so it is not sent over the network
+		self.enemyBulletImage = pygame.image.load("media/enemyBullet.png")
 
 		self.bulletController = BulletController(self)  #manages all bullets
 
