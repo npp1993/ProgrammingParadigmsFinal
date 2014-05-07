@@ -46,7 +46,7 @@ class GameSpace:
 		self.bulletNoise = pygame.mixer.Sound("media/bullet.wav")
 		self.welcomeNoise = pygame.mixer.Sound("media/galagaWelcome.wav")
 
-		self.startScreen()
+		#self.startScreen()
 
 	def startScreen(self):
 		self.font = pygame.font.Font(None, 30)
@@ -55,7 +55,8 @@ class GameSpace:
 
 		self.welcomeNoise.play()
 
-		for event in pygame.event.get():
+		while 1:
+			event = pygame.event.wait()
 			if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
 				return
 				

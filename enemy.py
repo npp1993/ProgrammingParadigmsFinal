@@ -150,8 +150,6 @@ class EnemyController:
 					self.hspeed = -self.hspeed
 				self.rects[i][j] = rect.move(self.hspeed, 0)
 				
-		print self.rects[0][0]
-
 
 	def blit(self):  #draw all enemies to screen
 		for enemy in self.enemies:
