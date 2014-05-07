@@ -51,7 +51,7 @@ class Player(pygame.sprite.Sprite):
 				self.bulletLastFiredAt = currentTime  #update time that last bullet was fired
 				
 				newBullet = Bullet(self.gs, math.pi/2)  #create new bullet
-				self.gs.bullets.append(newBullet)  #add it to bullets list
+				self.gs.bulletController.addBullet(newBullet)  #add it to bullets list
 				
 				self.gs.bulletNoise.play()
 			

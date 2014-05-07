@@ -7,35 +7,32 @@ from twisted.internet.task import LoopingCall
 from twisted.internet import reactor
 from twisted.internet import protocol, reactor
 import pygame
-import cPickle as pickle
-from gamespace import GameSpace
+from gamespace import *
 
 gs = 0  #define global variable gamespace 
 
-def startGameSpace(conn):  #initialize gamespace, start looping call for gamespace main loop
+def startGameSpace(conn, player):  #initialize gamespace, start looping call for gamespace main loop
 	global gs
-	gs = GameSpace(conn)
+	
+	if player == "server":  #create different gamespaces depending on which end of the connection game is on
+		gs = ServerGameSpace(conn)
+	else:
+		gs = ClientGameSpace(conn)
+		
+		
 	gs.main()
 	
 	tick = LoopingCall(gs.tick)  #set up looping call to run gamespace tick
 	tick.start(1.0/60)  #set to run tick every 60th of a second
 	
-def updateGameSpace(data):  #update player2 object with network data
-	unpacked = pickle.loads(data)
-	gs.player2.rect = unpacked["rect"]  #get other player data
-	gs.player2.angle = unpacked["angle"]
-		
-	if "newBullet" in unpacked:
-		gs.bullets.append(unpacked["newBullet"])
-	
 
 class ClientConnection(Protocol):
 
 	def dataReceived(self, data):
-		updateGameSpace(data)
+		gs.update(data)
 		
 	def connectionMade(self):
-		startGameSpace(self)
+		startGameSpace(self, "server")
 		
 class ClientConnectionFactory(Factory):
 	def buildProtocol(self, addr):
@@ -45,10 +42,10 @@ class ClientConnectionFactory(Factory):
 class ServerConnection(Protocol):
 
 	def dataReceived(self, data):
-		updateGameSpace(data)
+		gs.update(data)
 
 	def connectionMade(self):
-		startGameSpace(self)
+		startGameSpace(self, "client")
 	
 
 class ServerConnectionFactory(ReconnectingClientFactory):

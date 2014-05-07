@@ -22,13 +22,10 @@ class Enemy(pygame.sprite.Sprite):
 		
 		imageNum = randint(1,2)
 		
-		self.image = pygame.image.load("media/galaga_enemy"+ str(imageNum) + ".png")
-		self.rect = self.image.get_rect()
-		# place in bottom center of screen
-		self.rect.center = (x,y)
+		self.rect = self.gs.enemyImage.get_rect()
+		self.rect.center = (x,y)  # place in bottom center of screen
 
-		# initialize variables
-		#self.hits = 0
+
 		
 		self.i = 1  #used to keep track of which explosion sprite to display
 		
@@ -40,7 +37,7 @@ class Enemy(pygame.sprite.Sprite):
 
 	def tick(self):
 		if not self.exploding:
-			for bullet in self.gs.bullets:  #checks for any bullets that have hit this enemy
+			for bullet in self.gs.bulletController.bullets:  #checks for any bullets that have hit this enemy
 				if self.rect.colliderect(bullet.rect):
 					bullet.remove = True
 					self.exploding = True
@@ -61,10 +58,7 @@ class Enemy(pygame.sprite.Sprite):
 				nextRect = self.rect
 				nextRect.centerx += self.newSpeed - self.controller.hspeed
 				
-				collide = nextRect.collidelist(enemyRects)
-				print collide
-				
-				if collide < 0 and self.rect.centerx > self.gs.width/4:
+				if  nextRect.collidelist(enemyRects) < 0 and self.rect.centerx > self.gs.width/4:
 					self.new = False
 				elif self.rect.left > self.gs.width:
 					self.remove = True
@@ -75,18 +69,14 @@ class Enemy(pygame.sprite.Sprite):
 				
 		else:
 			# add one to get the next image name in the sequence; if there is no next image, return
-			if self.i > 15:
-				self.remove = True  #flag explosion for removal from explosions list
+			if self.i == 15:
+				self.remove = True  #flag explosion for removal from enemies list
 				return
-
-			# load next image in sequence
-			self.imagePath = "media/explosion/galaga_enemy1_explosion" + str(self.i) + ".png"
-			self.image = pygame.image.load(self.imagePath)
 			
-			self.i = self.i + 1
+			self.i = self.i + 1  #increment explosion sequence image counter
 
 
-class enemyController:
+class EnemyController:
 	def __init__(self, gs = None):
 		self.gs = gs
 		
@@ -107,7 +97,7 @@ class enemyController:
 	
 		self.hspeed = 2
 		
-	def tick(self):
+	def tick(self):  #animate all enemies on map
 		nextEnemies = []
 	
 		for enemy in self.enemies:  #remove all enemies done exploding
@@ -123,12 +113,9 @@ class enemyController:
 			self.lastEnemyAddedAt = currentTime  #update time that last bullet was fired
 			
 			randHeight = randint(-1, 1) * 50
-			
 			newEnemy = Enemy(-50, self.gs.height/8 + randHeight, self.gs, self, 4)
-
 			nextEnemies.append(newEnemy)  #add new enemy to enemies list
-
-				
+	
 		self.enemies = nextEnemies
 
 	def addEnemy(self):
@@ -136,7 +123,13 @@ class enemyController:
 		newEnemyRight = Enemy(self.rightEnemy.rect.center.y+50, self.gs.height/8, self.gs)
 		
 
-	def blit(self):
+	def blit(self):  #draw all enemies to screen
 		for enemy in self.enemies:
-			self.gs.screen.blit(enemy.image, enemy.rect)
-		
+			if not enemy.exploding:  #draw regular image if not exploding
+				self.gs.screen.blit(self.gs.enemyImage, enemy.rect)
+			else:  #draw exploding image
+				imagePath = "media/explosion/galaga_enemy1_explosion" + str(enemy.i) + ".png"
+				self.gs.screen.blit(pygame.image.load(imagePath), enemy.rect)
+				
+				
+

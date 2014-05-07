@@ -30,3 +30,29 @@ class Bullet(pygame.sprite.Sprite):
 	def tick(self):
 		# on tick, move the bullet hspeed and vspeed
 		self.rect = self.rect.move(self.hspeed, self.vspeed)
+		
+class BulletController():
+	def __init__(self, gs):
+		self.gs = gs
+		self.bullets = []
+		
+	def addBullet(self, bullet):
+		self.bullets.append(bullet)
+		
+	def tick(self):  #animate all bullets on map
+		nextBullets = []
+		
+		for bullet in self.bullets:  #remove all bullets from bullets array that are flagged to be removed
+			if not bullet.remove:
+				bullet.tick()
+				nextBullets.append(bullet)
+				
+		self.bullets = nextBullets  #updated bullets list
+
+	def blit(self):  #draw all bullets to screen
+		for bullet in self.bullets:
+			self.gs.screen.blit(self.gs.bulletImage, bullet.rect)
+
+				
+				
+				
