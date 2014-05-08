@@ -11,60 +11,92 @@ from datetime import datetime
 
 from bullet import *
 
-class Player(pygame.sprite.Sprite):
-	def __init__(self, gs = None):
-		pygame.sprite.Sprite.__init__(self)
-
-		# initialize and load images
+class PlayerController():
+	def __init__(self, gs):
 		self.gs = gs
-		self.image = pygame.image.load("media/galaga_spaceship.png")
-		self.rect = self.image.get_rect()
-		# place at bottom right of screen
-		self.rect.center = (self.gs.width-50, self.gs.height-50)
+	
+		self.player1 = Player(self)
+		self.player2 = Player(self)
+		
+		self.data.image = pygame.image.load("media/galaga_spaceship.png")
+		
+	def tick(self):
+		self.player1.tick()
+		self.player2.tick()
+		
+class PlayerData():
+	def __init__(self):  #class to hold data about enemy position and appearance
+		self.data.rect = None
+		self.exploding = False
+		self.data.i = 1
+		self.exploding = False
+		self.remove = False
 
-		self.angle = 0
-		self.orig_image = self.image
+class Player(pygame.sprite.Sprite):
+	def __init__(self):
+		pygame.sprite.Sprite.__init__(self, controller)
+		
+		self.data = PlayerData()  #instantiate player data
+		self.data.rect = self.controller.image.get_rect()
+		
+		# place at bottom right of screen
+		self.data.rect.center = (self.gs.width-50, self.gs.height-50)
 
 		# initialize variables
 		self.tofire = False
 		self.speed = 0
-		self.hspeed = 3
+		self.hspeed = 9
 		self.vspeed = 3
 		
-		self.bulletLastFiredAt = datetime.now()
+		self.bulletLastFiredAt = datetime.now()  #used to limit rate of bullet fire
+		
+	def blit(self):    #display player
+		if not self.remove:
+			self.controller.gs.screen.blit(self.image, self.data.rect)
 
 	def tick(self):
-		#mx, my = pygame.mouse.get_pos()
-		#px = self.rect.centerx
-		#py = self.rect.centery
-		# calculate angle to rotate & shoot bullet
-		#self.angle = -math.atan2(my-py, mx-px)
-		
-		self.rect = self.rect.move(self.speed, 0)  #move the ship
+		self.data.rect = self.data.rect.move(self.speed, 0)  #move the ship
 
-		if self.tofire == True:
-			currentTime = datetime.now()  #get current time
+		if not self.data.exploding:
+			if self.tofire == True:
+				currentTime = datetime.now()  #get current time
 			
-			timeDiff = currentTime - self.bulletLastFiredAt  #get time since last bullet was fired
+				timeDiff = currentTime - self.bulletLastFiredAt  #get time since last bullet was fired
 			
-			if (timeDiff.seconds*1000000) + timeDiff.microseconds > 500000:  #allow for one bullet to be fired every 0.5 seconds
-				self.bulletLastFiredAt = currentTime  #update time that last bullet was fired
+				if (timeDiff.seconds*1000000) + timeDiff.microseconds > 500000:  #allow for one bullet to be fired every 0.5 seconds
+					self.bulletLastFiredAt = currentTime  #update time that last bullet was fired
 				
-				newBullet = Bullet(self.gs, math.pi/2)  #create new bullet
-				self.gs.bulletController.addBullet(newBullet)  #add it to bullets list
+					newBullet = Bullet(self.controller.gs, -math.pi/2)  #create new bullet
 				
-				self.gs.bulletNoise.play()
+					if hasattr(self.controller.gs, "bulletController"):  #if player is server
+						self.controller.gs.bulletController.addBullet(newBullet)  #add it to bullets list
+				
+					self.controller.gs.bulletNoise.play()
 			
-				return newBullet
+					return newBullet
+			
+				bullets = []
+			
+			if hasattr(self.controller.gs, "bulletController"):  #get all bullets from gamespace
+				bullets = self.gs.bulletController.bullets
+			else:
+				bullets = self.gs.bullets
+				
+			for bullet in bullets:  #checks for any bullets that have hit this player
+				if bullet.enemy and self.data.rect.colliderect(bullet.rect):
+					bullet.remove = True
+					self.exploding = True
+					return
 		else:
-			# rotate image to face mouse
-			#self.angle = math.degrees(self.angle) - 30
-			#self.image = pygame.transform.rotate(self.orig_image, self.angle)
-			#rotate_rect = self.image.get_rect()
-			#rotate_rect.center = self.rect.center
-			#self.rect = rotate_rect
+			# add one to get the next image name in the sequence; if there is no next image, return
+			if self.data.i == 15:
+				self.remove = True  #flag explosion for removal from enemies list
+				return
 			
-			return None
+			imagePath = "media/explosion/galaga_enemy1_explosion" + str(self.data.i) + ".png"
+			self.data.image = pygame.image.load(imagePath)
+			
+			self.data.i = self.data.i + 1  #increment explosion sequence image counter
 			
 		self.tofire = False
 
@@ -85,7 +117,7 @@ class Player(pygame.sprite.Sprite):
 
 		
 		#if key == pygame.K_UP:
-		#	self.rect = self.rect.move(0, -self.vspeed)
+		#	self.data.rect = self.data.rect.move(0, -self.vspeed)
 		#elif key == pygame.K_DOWN:
-		#	self.rect = self.rect.move(0, self.vspeed)
+		#	self.data.rect = self.data.rect.move(0, self.vspeed)
 

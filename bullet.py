@@ -9,30 +9,28 @@ import pygame
 import math
 
 class Bullet(pygame.sprite.Sprite):
-	def __init__(self, gs, angle=None, enemy=False):
+	def __init__(self, gs, angle=None, enemy=None):
 		pygame.sprite.Sprite.__init__(self)
+		
+		self.enemy = False
+		
+		if enemy:
+			self.enemy = True
 
 		# initialize bullet info
-		if enemy:
+		if self.enemy:
 			self.rect = gs.enemyBulletImage.get_rect()
+			self.rect.center = enemy.data.rect.center
 		else:
 			self.rect = gs.bulletImage.get_rect()
-		# start bullet behind the player at the center
-		self.rect.center = gs.player.rect.center
+			self.rect.center = gs.player.rect.center
 
 		self.angle = angle
 		self.remove = False
 
 		# find horizontal and vertical speed according to the angle
 		self.hspeed = math.cos(self.angle)
-		self.vspeed = math.sin(self.angle)
-		
-		if enemy:
-			self.hspeed = self.hspeed*7
-			self.vspeed = -self.vspeed*13
-		else:
-			self.hspeed = self.hspeed*10
-			self.vspeed = -self.vspeed*10
+		self.vspeed = 12 * math.sin(self.angle)
 		
 	def tick(self):
 		# on tick, move the bullet hspeed and vspeed
@@ -50,7 +48,7 @@ class BulletController():
 		nextBullets = []
 		
 		for bullet in self.bullets:  #remove all bullets from bullets array that are flagged to be removed
-			if not bullet.remove:
+			if not bullet.remove and bullet.rect.centery < self.gs.height:
 				bullet.tick()
 				nextBullets.append(bullet)
 				
@@ -58,7 +56,10 @@ class BulletController():
 
 	def blit(self):  #draw all bullets to screen
 		for bullet in self.bullets:
-			self.gs.screen.blit(self.gs.bulletImage, bullet.rect)
+			if bullet.enemy:
+				self.gs.screen.blit(self.gs.enemyBulletImage, bullet.rect)
+			else:
+				self.gs.screen.blit(self.gs.bulletImage, bullet.rect)
 
 				
 				

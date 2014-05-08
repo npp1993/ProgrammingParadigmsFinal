@@ -8,31 +8,32 @@
 import pygame
 import math
 from random import randint
-from datetime import datetime
 
 from bullet import *
 
 class EnemyData():
-	def __init__(self, imageNum, exploding, i):  #class to hold data about enemy position and appearance
+	def __init__(self, imageNum):  #class to hold data about enemy position and appearance
 		self.rect = None
 		self.imageNum = imageNum
-		self.exploding = exploding
-		self.i = i
+		self.exploding = False
+		self.i = 1
 		
 
 class Enemy(pygame.sprite.Sprite):
-	def __init__(self, row, col, gs, controller, newSpeed = None):
+	def __init__(self, row, col, gs, controller):
 		pygame.sprite.Sprite.__init__(self)
 
 		# initialize enemy sprite
 		self.gs = gs
 		self.controller = controller
 		
-		self.data = EnemyData(randint(1,2), False, 1)
+		self.data = EnemyData(randint(1,2))
 		self.image = pygame.image.load("media/galaga_enemy" + str(self.data.imageNum) + ".png")  #pick random image for enemy
 		
 		self.row = row
 		self.col = col
+		
+		self.fireFrequency = randint(40, 200)  #frequency with which enemy fires  
 		
 		self.data.rect = self.controller.rects[self.row][self.col]  #get rect from rects array in controller
 		
@@ -41,35 +42,16 @@ class Enemy(pygame.sprite.Sprite):
 	def tick(self):
 		if not self.data.exploding:
 			for bullet in self.gs.bulletController.bullets:  #checks for any bullets that have hit this enemy
-				if self.data.rect.colliderect(bullet.rect):
+				if not bullet.enemy and self.data.rect.colliderect(bullet.rect):
 					bullet.remove = True
 					self.data.exploding = True
 					return
 
-			# keeps the enemy moving back and forth
-			#if not self.new:
-			#	self.data.rect = self.data.rect.move(self.controller.hspeed, 0)
-			#else:
-			#	self.data.rect = self.data.rect.move(self.newSpeed, 0)
-			#	
-			#	enemyRects = []
+			if self.controller.ticks % self.fireFrequency == 0:  #check if enemy is going to fire
+				newBullet = Bullet(self.gs, math.pi/2, self)  #create new enemy bullet
 				
-			#	for enemy in self.controller.enemies:
-			#		if self != enemy:
-			#			enemyRects.append(enemy.data.rect)
-				
-			#	nextRect = self.data.rect
-			#	nextRect.centerx += self.newSpeed - self.controller.hspeed
-				
-			#	if  nextRect.collidelist(enemyRects) < 0 and self.data.rect.centerx > self.gs.width/4:
-			#		self.new = False
-			#	elif self.data.rect.left > self.gs.width:
-			#		self.remove = True
-					
-			# if the enemy hits the edge of the screen, begin moving in the opposite direction
-			#if not self.new and self.data.rect.left < 20 or self.data.rect.right > self.gs.width - 20:
-			#	self.controller.hspeed = -self.controller.hspeed
-				
+				self.gs.bulletController.addBullet(newBullet)  #add it to bullets list
+				self.gs.bulletNoise.play()
 		else:
 			# add one to get the next image name in the sequence; if there is no next image, return
 			if self.data.i == 15:
@@ -86,69 +68,70 @@ class EnemyController:
 	def __init__(self, gs):
 		self.gs = gs
 		
+		self.ticks = 1  #counts number of ticks, used for timing
+		
 		self.enemies = []  #list of enemies
 		self.rects = []  #2 dimensional array of rects to hold enemies
+		self.filled = []  #2 dimensional array to keep track of which rects are filled
 		
 		width = 26  #width of all enemy sprites
 		height = 31  #height of all enemy sprites
 		
-		left = 100
+		startLeft = 25
+		left = startLeft
 		top = 100
 		
-		leftStep = self.gs.width/8
-		topStep = 50
+		leftStep = 35
+		topStep = 40
 		
 		for i in range(0, 3):  #instantiate rects array
 			self.rects.append(list())
-			for j in range(0, 5):
+			self.filled.append(list())
+			for j in range(0, 12):
 				self.rects[i].append(pygame.Rect(left, top, width, height))  #create new rect and place in rects array
 				left = left + leftStep  #incrment width
-			left = 100  #reset width to original width
+				self.filled[i].append(False)
+			left = startLeft  #reset width to original width
 			top = top + topStep  #increment height
 		
-		self.lastEnemyAddedAt = datetime.now()
-		
-		self.enemyAddFrequency = 2
-		
-		#one enemy is 26 x 29 pixels
-		#leftEnemy = Enemy(self.gs.width/2-50, self.gs.height/8, self.gs, self)
-		#middleEnemy = Enemy(self.gs.width/2, self.gs.height/8, self.gs, self)
-		#rightEnemy = Enemy(self.gs.width/2+50, self.gs.height/8, self.gs, self)
-
-		#self.enemies.append(leftEnemy)
-		#self.enemies.append(middleEnemy)
-		#self.enemies.append(rightEnemy)
+		self.enemyAddFrequency = 120
 	
 		self.hspeed = 2
 		
 	def tick(self):  #animate all enemies on map
 		nextEnemies = []
+		newBullets = []
 	
 		for enemy in self.enemies:  #remove all enemies done exploding
-			enemy.tick()
+			enemy.tick()			
 		
 			if not enemy.remove:  #enemy still alive or exploding
 				nextEnemies.append(enemy)
+			else:
+				self.filled[enemy.row][enemy.col] = False  #free rect in filled array
 				
-		currentTime = datetime.now()  #get current time
-		timeDiff = currentTime - self.lastEnemyAddedAt  #get time since last enemy was added
+		self.enemies = nextEnemies  #update enemies arrary
 		
-		if timeDiff.seconds > self.enemyAddFrequency:  #allow for one enemy to be fired every 2 seconds
-			self.lastEnemyAddedAt = currentTime  #update time that last bullet was fired
+		if self.ticks % self.enemyAddFrequency == 0:  #allow for one enemy to be added
+			row = randint(0, len(self.filled)-1)  #get random point in rects array, still need to make sure point is not already occupied
+			col = randint(0, len(self.filled[0])-1)
 			
-			randRow = randint(0, 2)  #get random point in rects array, still need to make sure point is not already occupied
-			randCol = randint(0, 4)
-			
-			newEnemy = Enemy(randRow, randCol, self.gs, self)  #place enemy in random spot on rects array
-			nextEnemies.append(newEnemy)  #add new enemy to enemies list
-	
-		self.enemies = nextEnemies
+			if self.filled[row][col] == False:  #only create enemy if random spot is free
+				newEnemy = Enemy(row, col, self.gs, self)  #place enemy in random spot on rects array
+				self.enemies.append(newEnemy)  #add new enemy to enemies list
+				self.filled[row][col] = True
 		
 		for i, rectList in enumerate(self.rects):  #move all rects together
 			for j, rect in enumerate(rectList):
-				if rect.left < 20 or rect.right > self.gs.width - 20:  #reverse rect speed if one of the rects gets close to a board edge
-					self.hspeed = -self.hspeed
 				self.rects[i][j] = rect.move(self.hspeed, 0)
+				
+		if self.ticks % 130 == 0:  #reverse speed
+			self.hspeed = -self.hspeed
+			
+		if self.enemyAddFrequency > 10 and self.ticks % 300 == 0:  #increase enemy add frequency
+			self.enemyAddFrequency = self.enemyAddFrequency - 10
+			
+		self.ticks = self.ticks + 1  #increment ticks
 				
 
 	def blit(self):  #draw all enemies to screen
