@@ -43,6 +43,11 @@ class Enemy(pygame.sprite.Sprite):
 		if not self.data.exploding:
 			for bullet in self.gs.bulletController.bullets:  #checks for any bullets that have hit this enemy
 				if not bullet.enemy and self.data.rect.colliderect(bullet.rect):
+					if bullet.id == "server":
+						self.gs.serverScore = self.gs.serverScore + 300  #increase server score
+					else:
+						self.gs.clientScore = self.gs.clientScore + 300  #increase player score
+					
 					bullet.remove = True
 					self.data.exploding = True
 					return

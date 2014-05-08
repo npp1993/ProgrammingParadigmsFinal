@@ -11,36 +11,19 @@ from datetime import datetime
 
 from bullet import *
 
-class PlayerController():
-	def __init__(self, gs):
-		self.gs = gs
-	
-		self.player1 = Player(self)
-		self.player2 = Player(self)
-		
-		self.data.image = pygame.image.load("media/galaga_spaceship.png")
-		
-	def tick(self):
-		self.player1.tick()
-		self.player2.tick()
-		
-class PlayerData():
-	def __init__(self):  #class to hold data about enemy position and appearance
-		self.data.rect = None
-		self.exploding = False
-		self.data.i = 1
-		self.exploding = False
-		self.remove = False
-
 class Player(pygame.sprite.Sprite):
-	def __init__(self):
-		pygame.sprite.Sprite.__init__(self, controller)
-		
-		self.data = PlayerData()  #instantiate player data
-		self.data.rect = self.controller.image.get_rect()
-		
+	def __init__(self, gs = None):
+		pygame.sprite.Sprite.__init__(self)
+
+		# initialize and load images
+		self.gs = gs
+		self.image = pygame.image.load("media/galaga_spaceship.png")
+		self.rect = self.image.get_rect()
 		# place at bottom right of screen
-		self.data.rect.center = (self.gs.width-50, self.gs.height-50)
+		self.rect.center = (self.gs.width-50, self.gs.height-50)
+
+		self.angle = 0
+		self.orig_image = self.image
 
 		# initialize variables
 		self.tofire = False
@@ -48,16 +31,21 @@ class Player(pygame.sprite.Sprite):
 		self.hspeed = 9
 		self.vspeed = 3
 		
-		self.bulletLastFiredAt = datetime.now()  #used to limit rate of bullet fire
+		self.exploding = False
+		self.remove = False
 		
-	def blit(self):    #display player
+		self.i = 1
+		
+		self.bulletLastFiredAt = datetime.now()
+		
+	def blit(self):
 		if not self.remove:
-			self.controller.gs.screen.blit(self.image, self.data.rect)
+			self.gs.screen.blit(self.image, self.rect)  #display local player
 
 	def tick(self):
-		self.data.rect = self.data.rect.move(self.speed, 0)  #move the ship
-
-		if not self.data.exploding:
+		if not self.exploding:
+			self.rect = self.rect.move(self.speed, 0)  #move the ship
+		
 			if self.tofire == True:
 				currentTime = datetime.now()  #get current time
 			
@@ -66,37 +54,37 @@ class Player(pygame.sprite.Sprite):
 				if (timeDiff.seconds*1000000) + timeDiff.microseconds > 500000:  #allow for one bullet to be fired every 0.5 seconds
 					self.bulletLastFiredAt = currentTime  #update time that last bullet was fired
 				
-					newBullet = Bullet(self.controller.gs, -math.pi/2)  #create new bullet
+					newBullet = Bullet(self.gs, -math.pi/2)  #create new bullet
+					newBullet.id = self.gs.id
 				
-					if hasattr(self.controller.gs, "bulletController"):  #if player is server
-						self.controller.gs.bulletController.addBullet(newBullet)  #add it to bullets list
+					if self.gs.id == "server":  #if player is server
+						self.gs.bulletController.addBullet(newBullet)  #add it to bullets list
 				
-					self.controller.gs.bulletNoise.play()
+					self.gs.bulletNoise.play()
 			
 					return newBullet
 			
-				bullets = []
+			bullets = []
 			
-			if hasattr(self.controller.gs, "bulletController"):  #get all bullets from gamespace
+			if self.gs.id == "server":  #get all bullets from gamespace
 				bullets = self.gs.bulletController.bullets
 			else:
 				bullets = self.gs.bullets
 				
 			for bullet in bullets:  #checks for any bullets that have hit this player
-				if bullet.enemy and self.data.rect.colliderect(bullet.rect):
-					bullet.remove = True
+				if bullet.enemy and self.rect.colliderect(bullet.rect):
 					self.exploding = True
 					return
 		else:
 			# add one to get the next image name in the sequence; if there is no next image, return
-			if self.data.i == 15:
+			if self.i == 15:
 				self.remove = True  #flag explosion for removal from enemies list
 				return
 			
-			imagePath = "media/explosion/galaga_enemy1_explosion" + str(self.data.i) + ".png"
-			self.data.image = pygame.image.load(imagePath)
+			imagePath = "media/explosion/galaga_enemy1_explosion" + str(self.i) + ".png"
+			self.image = pygame.image.load(imagePath)
 			
-			self.data.i = self.data.i + 1  #increment explosion sequence image counter
+			self.i = self.i + 1  #increment explosion sequence image counter
 			
 		self.tofire = False
 
@@ -117,7 +105,7 @@ class Player(pygame.sprite.Sprite):
 
 		
 		#if key == pygame.K_UP:
-		#	self.data.rect = self.data.rect.move(0, -self.vspeed)
+		#	self.rect = self.rect.move(0, -self.vspeed)
 		#elif key == pygame.K_DOWN:
-		#	self.data.rect = self.data.rect.move(0, self.vspeed)
+		#	self.rect = self.rect.move(0, self.vspeed)
 

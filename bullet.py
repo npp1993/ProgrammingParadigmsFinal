@@ -13,6 +13,7 @@ class Bullet(pygame.sprite.Sprite):
 		pygame.sprite.Sprite.__init__(self)
 		
 		self.enemy = False
+		self.player = ""  #owner of bullet
 		
 		if enemy:
 			self.enemy = True

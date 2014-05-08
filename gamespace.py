@@ -37,6 +37,9 @@ class GameSpace:
 		self.player = Player(self)
 		self.player2 = Player2(self)
 		
+		self.clientScore = 0  #player and server score
+		self.serverScore = 0
+		
 		self.bulletImage = pygame.image.load("media/bullet.png")  #store bullet sprite in local gamespace so it is not sent over the network
 		self.enemyBulletImage = pygame.image.load("media/enemyBullet.png")
 
@@ -46,13 +49,9 @@ class GameSpace:
 		
 		self.welcomeNoise.play()  #play welcome noise
 
-		#self.startScreen()
+
 
 	def startScreen(self):
-		self.font = pygame.font.Font(None, 30)
-		textImg = self.font.render("PRESS SPACE TO START GAME", 1, (255,0,0))
-		self.screen.blit(textImg, (self.width/2, self.height/2))
-
 		while True:  #get all events from user
 			event = pygame.event.wait()
 			if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
@@ -76,8 +75,11 @@ class ClientGameSpace(GameSpace):
 		self.bullets = []  #holds the bullets
 		pygame.display.set_caption("Galaga client")
 		
+		self.id = "client"
+		
 	def tick(self):  #tick bullets, player, enemy, explosions
 		GameSpace.tick(self)
+		
 		newBullet = self.player.tick()  #if player created a bullet in this tick, save it to send across network
 		
 		#enemies and bullets are not stored locally and ticked because they contain a server-controlled AI
@@ -86,12 +88,27 @@ class ClientGameSpace(GameSpace):
 
 		# blit to screen
 		self.screen.fill(self.black)  #clear screen
-
-		self.player.blit()  #blit local player
 		
-		if not self.player2.remove:  #blit other player
-			self.gs.screen.blit(self.player2.image, self.player2.rect)
-		
+		if self.player.remove and self.player2.remove:
+			font = pygame.font.Font(None, 40)
+			winString = "GAME OVER\n"
+			
+			if self.serverScore > self.clientScore:
+				winString = winString + "server wins"
+			elif self.clientScore > self.serverScore:
+				winString = winString + "client wins"
+			else:
+				winString = winString + "tie"
+			
+			winImage = font.render(winString, 1, (255,255,255))
+			self.screen.blit(winImage, (self.width/4, self.height/2))
+		else:
+			self.player.blit()  #blit player and player2
+			self.player2.blit()
+			
+		score = pygame.font.Font(None, 20)
+		scoreImage = score.render("server score: " + str(self.serverScore) + "    client score: " + str(self.clientScore), 1, (255, 255, 255))
+		self.screen.blit(scoreImage, (50, self.height-30))  #display player scores
 		
 		self.displayEnemies()  #display all enemies based on server data
 		self.displayBullets()  #display all bullets based on server data
@@ -119,6 +136,8 @@ class ClientGameSpace(GameSpace):
 	def sendData(self, newBullet = None):  #send data to other player
 		unpacked = dict()  #create data structure to send to other player
 		unpacked["rect"] = self.player.rect
+		unpacked["exploding"] = self.player.exploding
+		unpacked["remove"] = self.player.remove
 		
 		if newBullet:
 			unpacked["newBullet"] = newBullet
@@ -129,6 +148,12 @@ class ClientGameSpace(GameSpace):
 	def updateData(self, data):
 		unpacked = pickle.loads(data)
 		self.player2.rect = unpacked["rect"]  #get other player data	
+		self.player2.exploding = unpacked["exploding"]
+		self.player2.remove = unpacked["remove"]
+		
+		self.serverScore = unpacked["serverScore"]
+		self.clientScore = unpacked["clientScore"]
+
 		self.enemies = unpacked["enemies"]  #get all enemy data from server
 		self.bullets = unpacked["bullets"]
 
@@ -140,12 +165,14 @@ class ServerGameSpace(GameSpace):
 		self.bulletController = BulletController(self)  #manages all bullets
 		
 		pygame.display.set_caption("Galaga server")
+		
+		self.id = "server"
 
 		
 	def tick(self):  #tick bullets, player, enemy, explosions
 		GameSpace.tick(self)
+		newBullet = self.player.tick()  #if player created a bullet in this tick, save it to send across network
 		
-		self.playerController.tick()  #tick players
 		self.enemyController.tick()  #tick all server-controlled enemies, get bullets from enemies
 		self.bulletController.tick()  #tick all bullets
 		
@@ -154,10 +181,32 @@ class ServerGameSpace(GameSpace):
 		# blit to screen
 		self.screen.fill(self.black)  #clear screen
 		
-		self.playerController.blit()
-
-		self.screen.blit(self.player.image, self.player.rect)  #display local player
-		self.screen.blit(self.player2.image, self.player2.rect)  #display player 2
+		if self.player.remove and self.player2.remove:
+			font = pygame.font.Font(None, 40)
+			winString = "GAME OVER: "
+			
+			if self.serverScore > self.clientScore:
+				winString = winString + "server wins"
+			elif self.clientScore > self.serverScore:
+				winString = winString + "client wins"
+			else:
+				winString = winString + "tie"
+			
+			winImage = font.render(winString, 1, (255,255,255))
+			self.screen.blit(winImage, (self.width/4, self.height/2))
+		else:
+			self.player.blit()  #blit player and player2
+			self.player2.blit()
+			
+		if not self.player.exploding:  #increment score for staying alive
+			self.serverScore = self.serverScore + 1
+			
+		if not self.player2.exploding:  #increment score for staying alive
+			self.clientScore = self.clientScore + 1
+			
+		score = pygame.font.Font(None, 20)
+		scoreImage = score.render("server score: " + str(self.serverScore) + "    client score: " + str(self.clientScore), 1, (255, 255, 255))
+		self.screen.blit(scoreImage, (50, self.height-30))  #display player scores
 		
 		self.enemyController.blit()  #blit all enemies
 		self.bulletController.blit()  #blit all bullets
@@ -168,6 +217,11 @@ class ServerGameSpace(GameSpace):
 	def sendData(self):  #send data to other player
 		unpacked = dict()  #create data structure to send to other player
 		unpacked["rect"] = self.player.rect
+		unpacked["exploding"] = self.player.exploding
+		unpacked["remove"] = self.player.remove
+		
+		unpacked["serverScore"] = self.serverScore
+		unpacked["clientScore"] = self.clientScore
 		
 		unpacked["enemies"] = list()
 		
@@ -183,6 +237,8 @@ class ServerGameSpace(GameSpace):
 	def updateData(self, data):
 		unpacked = pickle.loads(data)
 		self.player2.rect = unpacked["rect"]  #get other player data
+		self.player2.exploding = unpacked["exploding"]
+		self.player2.remove = unpacked["remove"]
 		
 		if "newBullet" in unpacked:
 			self.bulletController.addBullet(unpacked["newBullet"])
